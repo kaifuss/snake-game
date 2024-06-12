@@ -10,7 +10,7 @@ WINDOW_CAPTION = 'Snake-Game'                        #название окна
 #КОНСТАНТЫ ИГРЫ
 INITIAL_APPLES_COUNT = 3                             #количество яблок
 INITIAL_GAME_SPEED  = 5                              #скорость игры
-BLOCK_SIZE = 10                                      #размер квадратика
+BLOCK_SIZE = 20                                      #размер квадратика
 WALL_BLOCKS = 3                                      #количество блоков в стене 
 AMOUNT_OF_RECTS = 20                                 #количество квадратиков
 INITIAL_SNAKE_SIZE = 3                               #размер змейки
