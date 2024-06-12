@@ -9,20 +9,20 @@ WINDOW_CAPTION = 'Snake-Game'                        #название окна
 
 #КОНСТАНТЫ ИГРЫ
 INITIAL_APPLES_COUNT = 3                             #количество яблок
-INITIAL_GAME_SPEED  = 10                             #скорость игры
-BLOCK_SIZE = 20                                      #размер квадратика
+INITIAL_GAME_SPEED  = 5                              #скорость игры
+BLOCK_SIZE = 10                                      #размер квадратика
 WALL_BLOCKS = 3                                      #количество блоков в стене 
 AMOUNT_OF_RECTS = 20                                 #количество квадратиков
 INITIAL_SNAKE_SIZE = 3                               #размер змейки
 SIZE_X = (width // BLOCK_SIZE  - WALL_BLOCKS * 2)            #количество блоков поля по X
 SIZE_Y = (height // BLOCK_SIZE - WALL_BLOCKS * 2)            #количество блоков поля по Y
 AMOUNT_OF_BLOCKS = SIZE_X * SIZE_Y                   #количество блоков
-START_X = SIZE_X // 2                                #X_0 координата головы змейки
-START_Y = SIZE_Y // 2                                #Y_0 координата головы змейки
+START_SNAKE_X = SIZE_X // 2                                #X_0 координата головы змейки
+START_SNAKE_Y = SIZE_Y // 2                                #Y_0 координата головы змейки
 
 #КОНСТАНТЫ ЦВЕТОВ
-BACKGROUND_COLOR = (235, 252, 207)                   #цвет заднего фона
-BORDERS_COLOR = (0, 110, 22)                         #цвет границ
+BACKGROUND_COLOR = (0, 110, 22)                      #цвет заднего фона
+GAME_FIELD_COLOR = (235, 252, 207)                   #цвет игрового поля
 SNAKE_COLOR = (190, 255, 100)                        #цвет змейки
 APPLE_COLOR = (255, 64, 64)                          #цвет яблока
 
@@ -118,7 +118,7 @@ def process_keys_events(game_state, events):
     else:                                               #игра запущена
         if "escape" in events or "space" in events:     #если нажата пауза
             game_state["game_paused"] = True
-        for direction in ['in', 'up', 'right', 'left']:  #движение змейки
+        for direction in ['down', 'up', 'right', 'left']:  #движение змейки
             if direction in events:                      #если нажата клавиша движения
                 game_state["direction"] = direction
                 game_state["last_direction"] = direction
@@ -142,8 +142,8 @@ def initialize_new_game(game_state):
 
 ### 2.2.1.1.1 Разместить змейку
 def place_snake(length, game_state):
-    x = START_X
-    y = START_Y
+    x = START_SNAKE_X
+    y = START_SNAKE_Y
     game_state["snake"].append((x, y))
     for i in range(1, length):
         game_state["snake"].append((x - i, y))
@@ -213,16 +213,24 @@ def update_game_screen(screen_of_game, game_state):
     elif game_state["game_paused"]:
         draw_paused_screen(screen_of_game)
     else:
+        draw_game_field(screen_of_game)
         draw_snake(screen_of_game, game_state["snake"])
         draw_apples(screen_of_game, game_state["apples"])
 
-    draw_wals(screen_of_game)
     draw_score(screen_of_game, game_state["score"])
     pygame.display.update()
 
 ### 2.3.1 Отрисовать Новая игра
 def draw_new_game_screen(screen_of_game):
-    pass
+    font = pygame.font.Font(None, 74)
+    text = font.render("Snake Game", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
+    screen_of_game.blit(text, text_rect)
+
+    font = pygame.font.Font(None, 36)
+    text = font.render("Press Enter to Start", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 2))
+    screen_of_game.blit(text, text_rect)
 
 ### 2.3.2 Отрисовать Пауза
 def draw_paused_screen(screen_of_game):
@@ -244,10 +252,19 @@ def draw_apples(screen_of_game, apples):
         rect_apple = (x_apple, y_apple, BLOCK_SIZE, BLOCK_SIZE)
         pygame.draw.rect(screen_of_game, APPLE_COLOR, rect_apple, border_radius=APPLE_RADIUS)
 
+### 2.3.5 Отрисовать игровое поле
+def draw_game_field(screen_of_game):
+    x_start = BLOCK_SIZE * WALL_BLOCKS
+    y_start = BLOCK_SIZE * WALL_BLOCKS
+    x_end = SIZE_X * BLOCK_SIZE + WALL_BLOCKS * BLOCK_SIZE
+    y_end = SIZE_Y * BLOCK_SIZE + WALL_BLOCKS * BLOCK_SIZE
+    print(f"Координата начала игрового поля: {x_start}, {y_start}")
+    print(f"Граница кончается X,Y: {x_start}, {y_start}")
+    for i in range(x_start, x_end, BLOCK_SIZE):
+        for j in range(y_start, y_end, BLOCK_SIZE):
+            field_block = (i, j, BLOCK_SIZE, BLOCK_SIZE)
+            pygame.draw.rect(screen_of_game, GAME_FIELD_COLOR, field_block)
 
-### 2.3.5 Отрисовать стены
-def draw_wals(screen_of_game):
-    pass
 
 ### 2.3.6 Отрисовать счет
 def draw_score(screen_of_game, score):
