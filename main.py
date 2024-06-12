@@ -258,8 +258,6 @@ def draw_game_field(screen_of_game):
     y_start = BLOCK_SIZE * WALL_BLOCKS
     x_end = SIZE_X * BLOCK_SIZE + WALL_BLOCKS * BLOCK_SIZE
     y_end = SIZE_Y * BLOCK_SIZE + WALL_BLOCKS * BLOCK_SIZE
-    print(f"Координата начала игрового поля: {x_start}, {y_start}")
-    print(f"Граница кончается X,Y: {x_start}, {y_start}")
     for i in range(x_start, x_end, BLOCK_SIZE):
         for j in range(y_start, y_end, BLOCK_SIZE):
             field_block = (i, j, BLOCK_SIZE, BLOCK_SIZE)
