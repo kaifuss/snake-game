@@ -27,7 +27,7 @@ SNAKE_COLOR = (190, 255, 100)                        #цвет змейки
 APPLE_COLOR = (255, 64, 64)                          #цвет яблока
 
 #КОНСТАНТЫ ОТРИСОВОК
-APPLE_RADIUS = BLOCK_SIZE // 3                       #радиус яблока
+APPLE_RADIUS = BLOCK_SIZE // 2                       #радиус яблока
 SNAKE_RADIUS = BLOCK_SIZE // 4                       #радиус змейки
 
 ############## 1. ФУНКЦИИ БЛОКА MAIN
