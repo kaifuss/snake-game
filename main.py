@@ -21,13 +21,14 @@ START_SNAKE_X = SIZE_X // 2                                #X_0 координа
 START_SNAKE_Y = SIZE_Y // 2                                #Y_0 координата головы змейки
 
 #КОНСТАНТЫ ЦВЕТОВ
-BACKGROUND_COLOR = (0, 110, 22)                      #цвет заднего фона
+WALLS_COLOR = (0, 110, 22)                      #цвет заднего фона
 GAME_FIELD_COLOR = (235, 252, 207)                   #цвет игрового поля
 SNAKE_COLOR = (190, 255, 100)                        #цвет змейки
 APPLE_COLOR = (255, 64, 64)                          #цвет яблока
 
 #КОНСТАНТЫ ОТРИСОВОК
-APPLE_RADIUS = BLOCK_SIZE // 4                       #радиус яблока
+APPLE_RADIUS = BLOCK_SIZE // 3                       #радиус яблока
+SNAKE_RADIUS = BLOCK_SIZE // 4                       #радиус змейки
 
 ############## 1. ФУНКЦИИ БЛОКА MAIN
 
@@ -121,8 +122,9 @@ def process_keys_events(game_state, events):
         for direction in ['down', 'up', 'right', 'left']:  #движение змейки
             if direction in events:                      #если нажата клавиша движения
                 game_state["direction"] = direction
-                game_state["last_direction"] = direction
                 break
+            else:
+                game_state["direction"] = game_state["last_direction"]
 
 ### 2.2.1.1 Начать новую игру
 def initialize_new_game(game_state):
@@ -160,26 +162,36 @@ def place_apples(amount, game_state):
 
 ### 2.2.2 Передвинуть змейку
 def move_snake(game_state):
-    move_direction = game_state["direction"] if game_state["direction"] else game_state["last_direction"]
-    if move_direction == "up":
-        x_dir = 0
-        y_dir = -1
-    elif move_direction == "down":
-        x_dir = 0
-        y_dir = 1
-    elif move_direction == "left":
-        x_dir = -1
-        y_dir = 0
-    elif move_direction == "right":
-        x_dir = 1
-        y_dir = 0
+    if game_state["direction"] == "up" and game_state["last_direction"] != "down":
+        x_dir, y_dir = get_x_y_directions("up")
+        game_state["last_direction"] = "up"
+    elif game_state["direction"] == "down" and game_state["last_direction"] != "up":
+        x_dir, y_dir = get_x_y_directions("down")
+        game_state["last_direction"] = "down"
+    elif game_state["direction"] == "left" and game_state["last_direction"] != "right":
+        x_dir, y_dir = get_x_y_directions("left")
+        game_state["last_direction"] = "left"
+    elif game_state["direction"] == "right" and game_state["last_direction"] != "left":
+        x_dir, y_dir = get_x_y_directions("right")
+        game_state["last_direction"] = "right"
     else:
-        return
+        x_dir, y_dir = get_x_y_directions(f"{game_state['last_direction']}")
     head = game_state["snake"][0]
     new_head = (head[0] + x_dir, head[1] + y_dir)
     game_state["snake"].insert(0, new_head)
     game_state["snake"].pop()
 
+### 2.2.2.1 Расшифровать движения
+def get_x_y_directions(forward):
+    if forward == "right":
+        return (1, 0)
+    elif forward == "left":
+        return (-1, 0)
+    elif forward == "up":
+        return (0, -1)
+    elif forward == "down":
+        return (0, 1)
+    
 ### 2.2.3 Проверить столкновения
 def check_collisions(game_state):
     x_head, y_head = game_state["snake"][0]
@@ -196,7 +208,7 @@ def check_eat_apple(game_state):
         game_state["snake"].append((x_head, y_head))
         place_apples(1, game_state)
         game_state["score"] += 1
-        game_state["game_speed"] += 1
+        game_state["game_speed"] += 0.5
 
 ### 2.2.5 Проверить выигрыш
 def check_game_won(game_state):
@@ -206,17 +218,16 @@ def check_game_won(game_state):
 
 ### 2.3 Отрисовка состояния игры
 def update_game_screen(screen_of_game, game_state):
-    screen_of_game.fill(BACKGROUND_COLOR)
+    screen_of_game.fill(GAME_FIELD_COLOR)
     
     if not game_state["game_running"]:
         draw_new_game_screen(screen_of_game)
     elif game_state["game_paused"]:
         draw_paused_screen(screen_of_game)
     else:
-        draw_game_field(screen_of_game)
         draw_snake(screen_of_game, game_state["snake"])
         draw_apples(screen_of_game, game_state["apples"])
-
+    draw_walls(screen_of_game)
     draw_score(screen_of_game, game_state["score"])
     pygame.display.update()
 
@@ -242,7 +253,7 @@ def draw_snake(screen_of_game, snake):
         x_segment = segment[0] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
         y_segment = segment[1] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
         rect_segment = (x_segment, y_segment, BLOCK_SIZE, BLOCK_SIZE)
-        pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segment)
+        pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segment, border_radius=SNAKE_RADIUS)
 
 ### 2.3.4 Отрисовать Яблоки
 def draw_apples(screen_of_game, apples):
@@ -252,17 +263,16 @@ def draw_apples(screen_of_game, apples):
         rect_apple = (x_apple, y_apple, BLOCK_SIZE, BLOCK_SIZE)
         pygame.draw.rect(screen_of_game, APPLE_COLOR, rect_apple, border_radius=APPLE_RADIUS)
 
-### 2.3.5 Отрисовать игровое поле
-def draw_game_field(screen_of_game):
-    x_start = BLOCK_SIZE * WALL_BLOCKS
-    y_start = BLOCK_SIZE * WALL_BLOCKS
-    x_end = SIZE_X * BLOCK_SIZE + WALL_BLOCKS * BLOCK_SIZE
-    y_end = SIZE_Y * BLOCK_SIZE + WALL_BLOCKS * BLOCK_SIZE
-    for i in range(x_start, x_end, BLOCK_SIZE):
-        for j in range(y_start, y_end, BLOCK_SIZE):
-            field_block = (i, j, BLOCK_SIZE, BLOCK_SIZE)
-            pygame.draw.rect(screen_of_game, GAME_FIELD_COLOR, field_block)
-
+### 2.3.5 Отрисовать Стены
+def draw_walls(screen_of_game):
+    #верхняя стена
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, 0), (width, WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    #нижняя стена
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, height - WALL_BLOCKS * BLOCK_SIZE), (width,WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    #левая стена
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, WALL_BLOCKS * BLOCK_SIZE), (WALL_BLOCKS * BLOCK_SIZE, height - WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    #правая стена
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((width - WALL_BLOCKS * BLOCK_SIZE, WALL_BLOCKS * BLOCK_SIZE), (width, height - WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
 
 ### 2.3.6 Отрисовать счет
 def draw_score(screen_of_game, score):
