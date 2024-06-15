@@ -1,40 +1,52 @@
 import pygame
 import sys
 import random
+import json
+
+pygame.init()
 
 #КОНСТАНТЫ ОКНА ПРОГРАММЫ
-SIZE_OF_WINDOW = width, height = 800, 600            #размер окна
+SIZE_OF_WINDOW = WIDTH_OF_WINDOW, HEIGHT_OF_WINDOW = 800, 600            #размер окна
 WINDOW_ICON = 'icon.png'                             #иконка
 WINDOW_CAPTION = 'Snake-Game'                        #название окна
 
-#КОНСТАНТЫ ИГРЫ
-INITIAL_APPLES_COUNT = 3                             #количество яблок
-INITIAL_GAME_SPEED  = 5                              #скорость игры
+
+#КОНСТАНТЫ ОТРИСОВОК
 BLOCK_SIZE = 20                                      #размер квадратика
 WALL_BLOCKS = 3                                      #количество блоков в стене 
 AMOUNT_OF_RECTS = 20                                 #количество квадратиков
-INITIAL_SNAKE_SIZE = 3                               #размер змейки
-SIZE_X = (width // BLOCK_SIZE  - WALL_BLOCKS * 2)            #количество блоков поля по X
-SIZE_Y = (height // BLOCK_SIZE - WALL_BLOCKS * 2)            #количество блоков поля по Y
+SIZE_X = (WIDTH_OF_WINDOW // BLOCK_SIZE  - WALL_BLOCKS * 2)    #количество блоков поля по X
+SIZE_Y = (HEIGHT_OF_WINDOW // BLOCK_SIZE - WALL_BLOCKS * 2)    #количество блоков поля по Y
 AMOUNT_OF_BLOCKS = SIZE_X * SIZE_Y                   #количество блоков
-START_SNAKE_X = SIZE_X // 2                                #X_0 координата головы змейки
-START_SNAKE_Y = SIZE_Y // 2                                #Y_0 координата головы змейки
-
-#КОНСТАНТЫ ЦВЕТОВ
-WALLS_COLOR = (0, 110, 22)                           #цвет заднего фона глобальный
-GAME_FIELD_COLOR = (235, 252, 207)                   #цвет игрового поля
-SNAKE_COLOR = (190, 255, 100)                        #цвет змейки
-APPLE_COLOR = (255, 64, 64)                          #цвет яблока
-
-#КОНСТАНТЫ ОТРИСОВОК
+START_SNAKE_X = SIZE_X // 2                          #X_0 координата головы змейки
+START_SNAKE_Y = SIZE_Y // 2                          #Y_0 координата головы змейки
 APPLE_RADIUS = BLOCK_SIZE // 2                       #радиус яблока
 SNAKE_RADIUS = BLOCK_SIZE // 4                       #радиус змейки
+
+#КОНСТАНТЫ ИГРЫ
+INITIAL_APPLES_COUNT = 3                             #постоянное количество яблок
+INITIAL_GAME_SPEED  = 5                              #начальная скорость игры
+INITIAL_SNAKE_SIZE = 3                               #начальный размер змейки
+
+# КОНСТАНТЫ ЦВЕТОВ ИГРЫ
+WALLS_COLOR = (34, 139, 34)  # цвет стен (более мягкий зелёный)
+GAME_FIELD_COLOR = (240, 255, 240)  # цвет игрового поля (мягкий зелёный)
+SNAKE_COLOR = (50, 205, 50)  # цвет змейки (светло-зелёный)
+APPLE_COLOR = (255, 69, 0)  # цвет яблока (оранжево-красный)
+
+# КОНСТАНТЫ ТЕКСТА
+CAPTION_FONT_COLOR = (255, 255, 255)
+TEXT_FONT_COLOR = (255, 255, 255)
+CAPTION_FONT_SIZE = BLOCK_SIZE * (WALL_BLOCKS + 1)  # размер шрифта заголовка
+CAPTION_FONT = pygame.font.SysFont('roboto', CAPTION_FONT_SIZE)  # шрифт заголовка
+TEXT_FONT_SIZE = BLOCK_SIZE * 2  # размер шрифта текста
+TEXT_FONT = pygame.font.SysFont('roboto', TEXT_FONT_SIZE)  # шрифт текста
 
 ############## 1. ФУНКЦИИ БЛОКА MAIN
 
 ### 1.1 Инициализация программы
 def initialize_program():
-    pygame.init()
+    #pygame.init()
     pygame.display.set_caption(WINDOW_CAPTION)                  #название окна 
     icon = pygame.image.load(WINDOW_ICON)                       #загрузка иконки
     pygame.display.set_icon(icon)                               #установка иконки
@@ -106,7 +118,7 @@ def update_game_state(game_state, events):
 def process_keys_events(game_state, events):
     if "quit" in events:                                #если событие - выход
         game_state["program_running"] = False
-    elif not game_state["game_running"]:                #если игра не запущена
+    elif not game_state["game_running"] and not game_state["game_over"]:#если игра не запущена
         if "escape" in events:                          #если нажата ESC
             game_state["program_running"] = False
         elif "enter" in events:                         #если нажата Enter
@@ -121,8 +133,10 @@ def process_keys_events(game_state, events):
         if "escape" in events:                          #если нажата ESC
             game_state["program_running"] = False
         elif "enter" in events:                         #если нажата Enter
-            initialize_new_game(game_state)             #начать новую игру
+            game_state["game_over"] = False
             game_state["game_running"] = True
+            initialize_new_game(game_state)             #начать новую игру
+
     else:                                               #игра запущена
         if "escape" in events or "space" in events:     #если нажата пауза
             game_state["game_paused"] = True
@@ -136,20 +150,20 @@ def process_keys_events(game_state, events):
 ### 2.2.1.1 Начать новую игру
 def initialize_new_game(game_state):
     # положение змейки
+    game_state["snake"] = []
     place_snake(INITIAL_SNAKE_SIZE, game_state)
     # положение яблок
+    game_state["apples"] = []
     place_apples(INITIAL_APPLES_COUNT, game_state)
-    # направление движения
+    # направление движения змейки
     game_state["direction"] = 'right'
     game_state["last_direction"] = 'right'
-    # на паузе ли игра
+    # состояние игры
     game_state["game_paused"] = False
-    #игра не проиграна
     game_state["game_over"] = False
+    game_state["game_speed"] = INITIAL_GAME_SPEED  
     # сколько очков
     game_state["score"] = 0
-    # скорость игры
-    game_state["game_speed"] = INITIAL_GAME_SPEED  
 
 ### 2.2.1.1.1 Разместить змейку
 def place_snake(length, game_state):
@@ -230,13 +244,16 @@ def check_game_won(game_state):
 ### 2.3 Отрисовка состояния игры
 def update_game_screen(screen_of_game, game_state):
     screen_of_game.fill(GAME_FIELD_COLOR)
-    if not game_state["game_running"]:
+    print(json.dumps(game_state, indent=4))
+    if not game_state["game_running"] and not game_state["game_over"]:
         draw_new_game_screen(screen_of_game)
     elif game_state["game_won"]:
         draw_game_won_screen(screen_of_game)
     elif game_state["game_over"]:
         draw_game_over_screen(screen_of_game)
     elif game_state["game_paused"]:
+        draw_snake(screen_of_game, game_state["snake"])
+        draw_apples(screen_of_game, game_state["apples"])
         draw_paused_screen(screen_of_game)
     else:
         draw_snake(screen_of_game, game_state["snake"])
@@ -248,19 +265,38 @@ def update_game_screen(screen_of_game, game_state):
 ### 2.3.1 Отрисовать Новая игра
 def draw_new_game_screen(screen_of_game):
     screen_of_game.fill(WALLS_COLOR)
-    font = pygame.font.Font(None, 74)
-    text = font.render("Snake Game", True, (220, 220, 220))
-    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
-    screen_of_game.blit(text, text_rect)
+    newgame_caption_text = CAPTION_FONT.render("Змейка", True, CAPTION_FONT_COLOR)
+    start_game_text = TEXT_FONT.render("Нажмите Enter для начала игры", True, TEXT_FONT_COLOR)
+    exit_text = TEXT_FONT.render("Нажмите Escape для выхода", True, TEXT_FONT_COLOR)
 
-    font = pygame.font.Font(None, 36)
-    text = font.render("Press Enter to Start", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 2))
-    screen_of_game.blit(text, text_rect)
+    newgame_caption_rect = newgame_caption_text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
+    start_game_rect = start_game_text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 2))
+    exit_rect = exit_text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 1.5))
+
+    screen_of_game.blit(newgame_caption_text, newgame_caption_rect)
+    screen_of_game.blit(start_game_text, start_game_rect)
+    screen_of_game.blit(exit_text, exit_rect)
+    pass
 
 ### 2.3.2 Отрисовать Пауза
 def draw_paused_screen(screen_of_game):
-    pass
+    overlay = pygame.Surface((SIZE_OF_WINDOW))
+    overlay.set_alpha(180)          # Устанавливаем прозрачность
+    overlay.fill((0, 0, 0))         # Черный фон
+    screen_of_game.blit(overlay, (0, 0))
+    
+    pause_caption_text = CAPTION_FONT.render("Игра на паузе", True, CAPTION_FONT_COLOR)
+    continue_text = TEXT_FONT.render("Нажмите Пробел для продолжения", True, TEXT_FONT_COLOR)
+    exit_text = TEXT_FONT.render("Нажмите Escape чтобы выйти", True, TEXT_FONT_COLOR)
+    
+    pause_caption_rect = pause_caption_text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
+    continue_rect = continue_text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 2))
+    exit_rect = exit_text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 1.6))
+    
+    screen_of_game.blit(pause_caption_text, pause_caption_rect)
+    screen_of_game.blit(continue_text, continue_rect)
+    screen_of_game.blit(exit_text, exit_rect)
+
 
 ### 2.3.3 Отрисовать Змейка
 def draw_snake(screen_of_game, snake):
@@ -281,13 +317,13 @@ def draw_apples(screen_of_game, apples):
 ### 2.3.5 Отрисовать Стены
 def draw_walls(screen_of_game):
     #верхняя стена
-    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, 0), (width, WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, 0), (WIDTH_OF_WINDOW, WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
     #нижняя стена
-    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, height - WALL_BLOCKS * BLOCK_SIZE), (width,WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, HEIGHT_OF_WINDOW - WALL_BLOCKS * BLOCK_SIZE), (WIDTH_OF_WINDOW,WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
     #левая стена
-    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, WALL_BLOCKS * BLOCK_SIZE), (WALL_BLOCKS * BLOCK_SIZE, height - WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((0, WALL_BLOCKS * BLOCK_SIZE), (WALL_BLOCKS * BLOCK_SIZE, HEIGHT_OF_WINDOW - WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
     #правая стена
-    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((width - WALL_BLOCKS * BLOCK_SIZE, WALL_BLOCKS * BLOCK_SIZE), (width, height - WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
+    pygame.draw.rect(screen_of_game, WALLS_COLOR, ((WIDTH_OF_WINDOW - WALL_BLOCKS * BLOCK_SIZE, WALL_BLOCKS * BLOCK_SIZE), (WIDTH_OF_WINDOW, HEIGHT_OF_WINDOW - WALL_BLOCKS * BLOCK_SIZE)), border_radius=0)
 
 ### 2.3.6 Отрисовать счет
 def draw_score(screen_of_game, score):
@@ -301,12 +337,12 @@ def draw_game_won_screen(screen_of_game):
 def draw_game_over_screen(screen_of_game):
     screen_of_game.fill(WALLS_COLOR)
     font = pygame.font.Font(None, 74)
-    text = font.render("Game Over", True, (220, 220, 220))
+    text = font.render("Проигрыш", True, (220, 220, 220))
     text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
     screen_of_game.blit(text, text_rect)
 
     font = pygame.font.Font(None, 36)
-    text = font.render("Press Enter to Start Again", True, (255, 255, 255))
+    text = font.render("Нажмите Enter чтобы начать с начала", True, (255, 255, 255))
     text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 2))
     screen_of_game.blit(text, text_rect)
 
@@ -333,36 +369,11 @@ if __name__ == "__main__":
     main()
 
 
-'''
-#само окно игры
-screenOfGame = pygame.display.set_mode(size)        #размер окна
-pygame.display.set_caption('Snake-Game')            #название окна
-
-#объект clock для управления частотой игры
-clock = pygame.time.Clock()
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            print('Выход из игры')
-            quit()
-    
-    #применение цвета
-    screenOfGame.fill(backgroundColor)          
-    #красота
-
-    #создание полей для игры ( x_0, y_0, ширина, высота )
+'''    #создание полей для игры ( x_0, y_0, ширина, высота )
     for column in range(amountOfRects):
         for row in range(amountOfRects):
             if (column + row) % 2 == 0:
                 pygame.draw.rect(screenOfGame, rectgColor, [130 + column * rectSize + column, 20 + row * rectSize + row, rectSize, rectSize])
             else:
                 pygame.draw.rect(screenOfGame, secondRectgColor, [130 + column * rectSize + column, 20 + row * rectSize + row, rectSize, rectSize])
-    
-    #применение всех изменений каждым кадром
-    pygame.display.update()
-    clock.tick(10)
-
-#конец
-pygame.quit()
-sys.exit()'''
+'''
