@@ -251,15 +251,13 @@ def update_game_screen(screen_of_game, game_state):
         draw_game_won_screen(screen_of_game)
     elif game_state["game_over"]:
         draw_game_over_screen(screen_of_game)
-    elif game_state["game_paused"]:
-        draw_snake(screen_of_game, game_state["snake"])
-        draw_apples(screen_of_game, game_state["apples"])
-        draw_paused_screen(screen_of_game)
     else:
         draw_snake(screen_of_game, game_state["snake"])
         draw_apples(screen_of_game, game_state["apples"])
-    draw_walls(screen_of_game)
-    draw_score(screen_of_game, game_state["score"])
+        draw_score(screen_of_game, game_state["score"])
+        if game_state["game_paused"]:
+            draw_paused_screen(screen_of_game)
+        draw_walls(screen_of_game)
     pygame.display.update()
 
 ### 2.3.1 Отрисовать Новая игра
