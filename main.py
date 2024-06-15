@@ -21,7 +21,7 @@ START_SNAKE_X = SIZE_X // 2                                #X_0 координа
 START_SNAKE_Y = SIZE_Y // 2                                #Y_0 координата головы змейки
 
 #КОНСТАНТЫ ЦВЕТОВ
-WALLS_COLOR = (0, 110, 22)                      #цвет заднего фона
+WALLS_COLOR = (0, 110, 22)                           #цвет заднего фона глобальный
 GAME_FIELD_COLOR = (235, 252, 207)                   #цвет игрового поля
 SNAKE_COLOR = (190, 255, 100)                        #цвет змейки
 APPLE_COLOR = (255, 64, 64)                          #цвет яблока
@@ -50,6 +50,7 @@ def initialize_game_state():
         "game_running": False,
         "game_paused": False,
         "game_won": False,
+        "game_over": False,
         "apples": [],
         "snake": [],
         "direction": None,
@@ -95,7 +96,7 @@ def get_game_events():
 ### 2.2 Обновление состояния игры внутри программы
 def update_game_state(game_state, events):
     process_keys_events(game_state, events)             #обработать нажатия клавиш
-    if game_state["game_running"]:                      # если игра запущена
+    if game_state["game_running"] and not game_state["game_paused"]:# если игра запущена и не на паузе
         move_snake(game_state)                          # передвинуть змейку
         check_collisions(game_state)                    # проверить столкновения
         check_eat_apple(game_state)                     # проверить съедание яблока
@@ -116,6 +117,12 @@ def process_keys_events(game_state, events):
             game_state["game_running"] = False
         elif "space" in events:                         #если нажата пробел
             game_state["game_paused"] = False
+    elif game_state["game_over"]:
+        if "escape" in events:                          #если нажата ESC
+            game_state["program_running"] = False
+        elif "enter" in events:                         #если нажата Enter
+            initialize_new_game(game_state)             #начать новую игру
+            game_state["game_running"] = True
     else:                                               #игра запущена
         if "escape" in events or "space" in events:     #если нажата пауза
             game_state["game_paused"] = True
@@ -137,6 +144,8 @@ def initialize_new_game(game_state):
     game_state["last_direction"] = 'right'
     # на паузе ли игра
     game_state["game_paused"] = False
+    #игра не проиграна
+    game_state["game_over"] = False
     # сколько очков
     game_state["score"] = 0
     # скорость игры
@@ -197,8 +206,10 @@ def check_collisions(game_state):
     x_head, y_head = game_state["snake"][0]
     if x_head < 0 or x_head >= SIZE_X or y_head < 0 or y_head >= SIZE_Y:
         game_state["game_running"] = False
+        game_state["game_over"] = True
     if len(game_state["snake"]) > len(set(game_state["snake"])):
         game_state["game_running"] = False
+        game_state["game_over"] = True
 
 ### 2.2.4 Проверить съедание яблока
 def check_eat_apple(game_state):
@@ -219,9 +230,12 @@ def check_game_won(game_state):
 ### 2.3 Отрисовка состояния игры
 def update_game_screen(screen_of_game, game_state):
     screen_of_game.fill(GAME_FIELD_COLOR)
-    
     if not game_state["game_running"]:
         draw_new_game_screen(screen_of_game)
+    elif game_state["game_won"]:
+        draw_game_won_screen(screen_of_game)
+    elif game_state["game_over"]:
+        draw_game_over_screen(screen_of_game)
     elif game_state["game_paused"]:
         draw_paused_screen(screen_of_game)
     else:
@@ -233,8 +247,9 @@ def update_game_screen(screen_of_game, game_state):
 
 ### 2.3.1 Отрисовать Новая игра
 def draw_new_game_screen(screen_of_game):
+    screen_of_game.fill(WALLS_COLOR)
     font = pygame.font.Font(None, 74)
-    text = font.render("Snake Game", True, (255, 255, 255))
+    text = font.render("Snake Game", True, (220, 220, 220))
     text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
     screen_of_game.blit(text, text_rect)
 
@@ -277,6 +292,23 @@ def draw_walls(screen_of_game):
 ### 2.3.6 Отрисовать счет
 def draw_score(screen_of_game, score):
     pass
+
+### 2.3.7 Отрисовать Выигрыш
+def draw_game_won_screen(screen_of_game):
+    pass
+
+### 2.3.8 Отрисовать Поражение
+def draw_game_over_screen(screen_of_game):
+    screen_of_game.fill(WALLS_COLOR)
+    font = pygame.font.Font(None, 74)
+    text = font.render("Game Over", True, (220, 220, 220))
+    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
+    screen_of_game.blit(text, text_rect)
+
+    font = pygame.font.Font(None, 36)
+    text = font.render("Press Enter to Start Again", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 2))
+    screen_of_game.blit(text, text_rect)
 
 ############## MAIN ##############
 def main():
