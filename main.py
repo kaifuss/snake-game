@@ -1,7 +1,6 @@
 import pygame
 import sys
 import random
-import json
 
 pygame.init()
 
@@ -9,7 +8,6 @@ pygame.init()
 SIZE_OF_WINDOW = WIDTH_OF_WINDOW, HEIGHT_OF_WINDOW = 800, 600            #размер окна
 WINDOW_ICON = 'icon.png'                             #иконка
 WINDOW_CAPTION = 'Snake-Game'                        #название окна
-
 
 #КОНСТАНТЫ ОТРИСОВОК
 BLOCK_SIZE = 20                                      #размер квадратика
@@ -244,7 +242,6 @@ def check_game_won(game_state):
 ### 2.3 Отрисовка состояния игры
 def update_game_screen(screen_of_game, game_state):
     screen_of_game.fill(GAME_FIELD_COLOR)
-    print(json.dumps(game_state, indent=4))
     if not game_state["game_running"] and not game_state["game_over"]:
         draw_new_game_screen(screen_of_game)
     elif game_state["game_won"]:
@@ -252,7 +249,7 @@ def update_game_screen(screen_of_game, game_state):
     elif game_state["game_over"]:
         draw_game_over_screen(screen_of_game)
     else:
-        draw_snake(screen_of_game, game_state["snake"])
+        draw_snake(screen_of_game, game_state["snake"], game_state["direction"])
         draw_apples(screen_of_game, game_state["apples"])
         draw_score(screen_of_game, game_state["score"])
         if game_state["game_paused"]:
@@ -274,7 +271,6 @@ def draw_new_game_screen(screen_of_game):
     screen_of_game.blit(newgame_caption_text, newgame_caption_rect)
     screen_of_game.blit(start_game_text, start_game_rect)
     screen_of_game.blit(exit_text, exit_rect)
-    pass
 
 ### 2.3.2 Отрисовать Пауза
 def draw_paused_screen(screen_of_game):
@@ -297,12 +293,27 @@ def draw_paused_screen(screen_of_game):
 
 
 ### 2.3.3 Отрисовать Змейка
-def draw_snake(screen_of_game, snake):
-    for segment in snake:
+def draw_snake(screen_of_game, snake, direction):
+    draw_snake_head(screen_of_game, snake[0], direction)
+    draw_snake_body(screen_of_game, snake)
+    draw_snake_tail(screen_of_game, snake[-1], direction)
+    '''for segment in snake:
         x_segment = segment[0] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
         y_segment = segment[1] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
         rect_segment = (x_segment, y_segment, BLOCK_SIZE, BLOCK_SIZE)
         pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segment, border_radius=SNAKE_RADIUS)
+    '''
+
+def draw_snake_head(screen_of_game, head, direction):
+    x_head = head[0] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
+    y_head = head[1] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
+    rect_head = (x_head, y_head, BLOCK_SIZE, BLOCK_SIZE)
+    pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_head, border_radius=SNAKE_RADIUS)
+    pass
+def draw_snake_body(screen_of_game, snake):
+    pass
+def draw_snake_tail(screen_of_game, tail, direction):
+    pass
 
 ### 2.3.4 Отрисовать Яблоки
 def draw_apples(screen_of_game, apples):
