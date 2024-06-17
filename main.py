@@ -9,7 +9,7 @@ SIZE_OF_WINDOW = WIDTH_OF_WINDOW, HEIGHT_OF_WINDOW = 800, 600            #раз
 WINDOW_ICON = 'icon.png'                             #иконка
 WINDOW_CAPTION = 'Snake-Game'                        #название окна
 
-#КОНСТАНТЫ ОТРИСОВОК
+#КОНСТАНТЫ ИГРОВОГО ПОЛЯ
 BLOCK_SIZE = 20                                      #размер квадратика
 WALL_BLOCKS = 3                                      #количество блоков в стене 
 AMOUNT_OF_RECTS = 20                                 #количество квадратиков
@@ -21,7 +21,7 @@ START_SNAKE_Y = SIZE_Y // 2                          #Y_0 координата �
 APPLE_RADIUS = BLOCK_SIZE // 2                       #радиус яблока
 SNAKE_RADIUS = BLOCK_SIZE // 4                       #радиус змейки
 
-#КОНСТАНТЫ ИГРЫ
+#КОНСТАНТЫ ИГРОВОГО ПРОЦЕССА
 INITIAL_APPLES_COUNT = 3                             #постоянное количество яблок
 INITIAL_GAME_SPEED  = 5                              #начальная скорость игры
 INITIAL_SNAKE_SIZE = 3                               #начальный размер змейки
@@ -39,6 +39,10 @@ CAPTION_FONT_SIZE = BLOCK_SIZE * (WALL_BLOCKS + 1)  # размер шрифта 
 CAPTION_FONT = pygame.font.SysFont('roboto', CAPTION_FONT_SIZE)  # шрифт заголовка
 TEXT_FONT_SIZE = BLOCK_SIZE * 2  # размер шрифта текста
 TEXT_FONT = pygame.font.SysFont('roboto', TEXT_FONT_SIZE)  # шрифт текста
+
+# КОНСТАНТЫ БЛОКИ
+SNAKE_X_SEGMENT = (BLOCK_SIZE // 2, BLOCK_SIZE // 4)     #размер сегмента змейки по OX
+SNAKE_Y_SEGMENT = (BLOCK_SIZE // 4, BLOCK_SIZE // 2)     #размер сегмента змейки по OY
 
 ############## 1. ФУНКЦИИ БЛОКА MAIN
 
@@ -294,25 +298,90 @@ def draw_paused_screen(screen_of_game):
 
 ### 2.3.3 Отрисовать Змейка
 def draw_snake(screen_of_game, snake, direction):
-    draw_snake_head(screen_of_game, snake[0], direction)
+    draw_snake_head(screen_of_game, snake[0], snake[1])
     draw_snake_body(screen_of_game, snake)
-    draw_snake_tail(screen_of_game, snake[-1], direction)
-    '''for segment in snake:
-        x_segment = segment[0] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
-        y_segment = segment[1] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
-        rect_segment = (x_segment, y_segment, BLOCK_SIZE, BLOCK_SIZE)
-        pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segment, border_radius=SNAKE_RADIUS)
-    '''
+    draw_snake_tail(screen_of_game, snake[-1])
 
-def draw_snake_head(screen_of_game, head, direction):
-    x_head = head[0] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
-    y_head = head[1] * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
-    rect_head = (x_head, y_head, BLOCK_SIZE, BLOCK_SIZE)
-    pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_head, border_radius=SNAKE_RADIUS)
-    pass
+### 2.3.3.1 Отрисовать Голову
+def draw_snake_head(screen_of_game, head, neck):
+    x_head, y_head = head
+    x_prev, y_prev = neck
+    delta_x_prev = x_head - x_prev             #изменение X координаты по отношению к ПРЕДЫДУЩЕМУ
+    delta_y_prev = y_head - y_prev             #изменение Y координаты по отношению к ПРЕДЫДУЩЕМУ
+
+    if (delta_x_prev > 0):
+        draw_snake_body_left(screen_of_game, x_head, y_head)
+    if (delta_x_prev < 0):
+        draw_snake_body_right(screen_of_game, x_head, y_head)
+    if (delta_y_prev > 0):
+        draw_snake_body_top(screen_of_game, x_head, y_head)
+    if (delta_y_prev < 0):
+        draw_snake_body_bottom(screen_of_game, x_head, y_head)
+    
+    x_start_point = (x_head * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
+    y_start_point = (y_head * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
+    pygame.draw.circle(screen_of_game, SNAKE_COLOR, (x_start_point, y_start_point), BLOCK_SIZE // 2)
+
+### 2.3.3.2 Отрисовать Тело
 def draw_snake_body(screen_of_game, snake):
-    pass
-def draw_snake_tail(screen_of_game, tail, direction):
+    for i, segment in enumerate(snake[1:-1]):
+        i +=1                                   #счётчик сегментов +1 т.к. начинаем со snake[1]
+        x_0, y_0 = segment                      #кооридаты текущего сегмента
+        x_next, y_next = snake[i + 1]           #кооридаты следующего сегмента
+        x_prev, y_prev = snake[i - 1]           #кооридаты предыдущего сегмента
+
+        delta_x_next = x_0 - x_next             #изменение X координаты по отношению к СЛЕДУЮЩЕМУ
+        delta_y_next = y_0 - y_next             #изменение Y координаты по отношению к СЛЕДУЮЩЕМУ
+        delta_x_prev = x_0 - x_prev             #изменение X координаты по отношению к ПРЕДЫДУЩЕМУ
+        delta_y_prev = y_0 - y_prev             #изменение Y координаты по отношению к ПРЕДЫДУЩЕМУ
+
+        if (delta_x_next > 0 or delta_x_prev > 0):
+            draw_snake_body_left(screen_of_game, x_0, y_0)
+        if (delta_x_next < 0 or delta_x_prev < 0):
+            draw_snake_body_right(screen_of_game, x_0, y_0)
+        if (delta_y_next > 0 or delta_y_prev > 0):
+            draw_snake_body_top(screen_of_game, x_0, y_0)
+        if (delta_y_next < 0 or delta_y_prev < 0):
+            draw_snake_body_bottom(screen_of_game, x_0, y_0)
+        if (not (delta_x_next == 0 and delta_x_prev == 0)) or (not (delta_y_next == 0 and delta_y_prev == 0)):
+            draw_snake_body_circle(screen_of_game, x_0, y_0)
+
+### 2.3.3.2.1 Отрисовать ЛЕВУЮ часть сегмента тела
+def draw_snake_body_left(screen_of_game, x_0, y_0):
+    x_start_point = x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
+    y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
+    rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
+    pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement)
+
+### 2.3.3.2.2 Отрисовать ВЕРХНЮЮ часть сегмента тела
+def draw_snake_body_top(screen_of_game, x_0, y_0):
+    x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
+    y_start_point = y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
+    rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
+    pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement)
+
+### 2.3.3.2.3 Отрисовать ПРАВУЮ часть сегмента тела
+def draw_snake_body_right(screen_of_game, x_0, y_0):
+    x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
+    y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
+    rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
+    pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement) 
+
+### 2.3.3.2.4 Отрисовать НИЖНЮЮ часть сегмента тела
+def draw_snake_body_bottom(screen_of_game, x_0, y_0):
+    x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
+    y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
+    rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
+    pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement)
+
+### 2.3.3.2.5 Отрисовать КРУГ для сглаживания
+def draw_snake_body_circle(screen_of_game, x_0, y_0):
+    x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
+    y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
+    pygame.draw.circle(screen_of_game, SNAKE_COLOR, (x_start_point, y_start_point), BLOCK_SIZE // 4)
+
+### 2.3.3.3 Отрисовать Хвост
+def draw_snake_tail(screen_of_game, tail):
     pass
 
 ### 2.3.4 Отрисовать Яблоки
