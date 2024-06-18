@@ -346,35 +346,35 @@ def draw_snake_body(screen_of_game, snake):
         if (not (delta_x_next == 0 and delta_x_prev == 0)) or (not (delta_y_next == 0 and delta_y_prev == 0)):
             draw_snake_body_circle(screen_of_game, x_0, y_0)
 
-### 2.3.3.2.1 Отрисовать ЛЕВУЮ часть сегмента тела
+### 2.3.3.2.1 Отрисовать Тело ЛЕВУЮ часть сегмента тела
 def draw_snake_body_left(screen_of_game, x_0, y_0):
     x_start_point = x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
     y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
     rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
     pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement)
 
-### 2.3.3.2.2 Отрисовать ВЕРХНЮЮ часть сегмента тела
+### 2.3.3.2.2 Отрисовать Тело ВЕРХНЮЮ часть сегмента тела
 def draw_snake_body_top(screen_of_game, x_0, y_0):
     x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
     y_start_point = y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS
     rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
     pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement)
 
-### 2.3.3.2.3 Отрисовать ПРАВУЮ часть сегмента тела
+### 2.3.3.2.3 Отрисовать Тело ПРАВУЮ часть сегмента тела
 def draw_snake_body_right(screen_of_game, x_0, y_0):
     x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
     y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
     rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
     pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement) 
 
-### 2.3.3.2.4 Отрисовать НИЖНЮЮ часть сегмента тела
+### 2.3.3.2.4 Отрисовать Тело НИЖНЮЮ часть сегмента тела
 def draw_snake_body_bottom(screen_of_game, x_0, y_0):
     x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 4
     y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
     rect_segement = (x_start_point, y_start_point, BLOCK_SIZE // 2, BLOCK_SIZE // 2)
     pygame.draw.rect(screen_of_game, SNAKE_COLOR, rect_segement)
 
-### 2.3.3.2.5 Отрисовать КРУГ для сглаживания
+### 2.3.3.2.5 Отрисовать Тело КРУГ для сглаживания
 def draw_snake_body_circle(screen_of_game, x_0, y_0):
     x_start_point = (x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
     y_start_point = (y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS) + BLOCK_SIZE // 2
