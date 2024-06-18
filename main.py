@@ -27,10 +27,11 @@ INITIAL_GAME_SPEED  = 5                              #начальная ско�
 INITIAL_SNAKE_SIZE = 3                               #начальный размер змейки
 
 # КОНСТАНТЫ ЦВЕТОВ ИГРЫ
-WALLS_COLOR = (34, 139, 34)  # цвет стен (более мягкий зелёный)
-GAME_FIELD_COLOR = (240, 255, 240)  # цвет игрового поля (мягкий зелёный)
-SNAKE_COLOR = (50, 205, 50)  # цвет змейки (светло-зелёный)
-APPLE_COLOR = (255, 69, 0)  # цвет яблока (оранжево-красный)
+WALLS_COLOR = (34, 139, 34)                     # цвет стен (более мягкий зелёный)
+GAME_FIELD_COLOR = (240, 255, 240)              # цвет игрового поля (мягкий зелёный)
+GAME_FIELD_ADD_COLOR = (169, 169, 169)          # цвет клеток (темный серый)
+SNAKE_COLOR = (50, 205, 50)                     # цвет змейки (светло-зелёный)
+APPLE_COLOR = (255, 69, 0)                      # цвет яблока (оранжево-красный)
 
 # КОНСТАНТЫ ТЕКСТА
 CAPTION_FONT_COLOR = (255, 255, 255)
@@ -300,7 +301,7 @@ def draw_paused_screen(screen_of_game):
 def draw_snake(screen_of_game, snake, direction):
     draw_snake_head(screen_of_game, snake[0], snake[1])
     draw_snake_body(screen_of_game, snake)
-    draw_snake_tail(screen_of_game, snake[-1])
+    draw_snake_tail(screen_of_game, snake[-2], snake[-1])
 
 ### 2.3.3.1 Отрисовать Голову
 def draw_snake_head(screen_of_game, head, neck):
@@ -311,10 +312,10 @@ def draw_snake_head(screen_of_game, head, neck):
 
     if (delta_x_prev > 0):
         draw_snake_body_left(screen_of_game, x_head, y_head)
-    if (delta_x_prev < 0):
-        draw_snake_body_right(screen_of_game, x_head, y_head)
     if (delta_y_prev > 0):
         draw_snake_body_top(screen_of_game, x_head, y_head)
+    if (delta_x_prev < 0):
+        draw_snake_body_right(screen_of_game, x_head, y_head)
     if (delta_y_prev < 0):
         draw_snake_body_bottom(screen_of_game, x_head, y_head)
     
@@ -337,10 +338,10 @@ def draw_snake_body(screen_of_game, snake):
 
         if (delta_x_next > 0 or delta_x_prev > 0):
             draw_snake_body_left(screen_of_game, x_0, y_0)
-        if (delta_x_next < 0 or delta_x_prev < 0):
-            draw_snake_body_right(screen_of_game, x_0, y_0)
         if (delta_y_next > 0 or delta_y_prev > 0):
             draw_snake_body_top(screen_of_game, x_0, y_0)
+        if (delta_x_next < 0 or delta_x_prev < 0):
+            draw_snake_body_right(screen_of_game, x_0, y_0)
         if (delta_y_next < 0 or delta_y_prev < 0):
             draw_snake_body_bottom(screen_of_game, x_0, y_0)
         if (not (delta_x_next == 0 and delta_x_prev == 0)) or (not (delta_y_next == 0 and delta_y_prev == 0)):
@@ -381,8 +382,70 @@ def draw_snake_body_circle(screen_of_game, x_0, y_0):
     pygame.draw.circle(screen_of_game, SNAKE_COLOR, (x_start_point, y_start_point), BLOCK_SIZE // 4)
 
 ### 2.3.3.3 Отрисовать Хвост
-def draw_snake_tail(screen_of_game, tail):
+def draw_snake_tail(screen_of_game, pretail, tail):
+    x_tail, y_tail = tail
+    x_next, y_next = pretail
+
+    x_tail_delta = x_tail - x_next
+    y_tail_delta = y_tail - y_next
+
+    if (x_tail_delta < 0):
+        draw_snake_tail_left(screen_of_game, x_tail, y_tail)
+    if (y_tail_delta < 0):
+        draw_snake_tail_top(screen_of_game, x_tail, y_tail)
+    if (x_tail_delta > 0):
+        draw_snake_tail_right(screen_of_game, x_tail, y_tail)
+    if (y_tail_delta > 0):
+        draw_snake_tail_bottom(screen_of_game, x_tail, y_tail)
     pass
+
+### 2.3.3.3.1 Отрисовать Хвост ЛЕВУЮ часть сегмента тела
+def draw_snake_tail_left(screen_of_game, x_0, y_0):
+    draw_snake_body_right(screen_of_game, x_0, y_0)
+    
+    tail_points = []
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 4))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE  * 3 / 4))
+    
+    pygame.draw.polygon(screen_of_game, SNAKE_COLOR, tail_points)
+    tail_points = []
+
+### 2.3.3.3.2 Отрисовать Хвост ВЕРХНЮЮ часть сегмента тела
+def draw_snake_tail_top(screen_of_game, x_0, y_0):
+    draw_snake_body_bottom(screen_of_game, x_0, y_0)
+
+    tail_points = []
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE * 3 / 4, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 4, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2))
+    
+    pygame.draw.polygon(screen_of_game, SNAKE_COLOR, tail_points)
+    tail_points = []
+
+### 2.3.3.3.3 Отрисовать Хвост ПРАВУЮ часть сегмента тела
+def draw_snake_tail_right(screen_of_game, x_0, y_0):
+    draw_snake_body_left(screen_of_game, x_0, y_0)
+
+    tail_points = []
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE * 3 / 4))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 4))
+    
+    pygame.draw.polygon(screen_of_game, SNAKE_COLOR, tail_points)
+    tail_points = []
+
+### 2.3.3.3.4 Отрисовать Хвост НИЖНЮЮ часть сегмента тела
+def draw_snake_tail_bottom(screen_of_game, x_0, y_0):
+    draw_snake_body_top(screen_of_game, x_0, y_0)
+
+    tail_points = []
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 4, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2))
+    tail_points.append((x_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE * 3 / 4, y_0 * BLOCK_SIZE + BLOCK_SIZE * WALL_BLOCKS + BLOCK_SIZE // 2))
+    
+    pygame.draw.polygon(screen_of_game, SNAKE_COLOR, tail_points)
+    tail_points = []
 
 ### 2.3.4 Отрисовать Яблоки
 def draw_apples(screen_of_game, apples):
