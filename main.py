@@ -29,7 +29,7 @@ INITIAL_SNAKE_SIZE = 3                               #начальный раз�
 # КОНСТАНТЫ ЦВЕТОВ ИГРЫ
 WALLS_COLOR = (34, 139, 34)                     # цвет стен (более мягкий зелёный)
 GAME_FIELD_COLOR = (240, 255, 240)              # цвет игрового поля (мягкий зелёный)
-GAME_FIELD_ADD_COLOR = (169, 169, 169)          # цвет клеток (темный серый)
+GAME_FIELD_ADD_COLOR = (210, 225, 210)          # цвет клеток (темный серый)
 SNAKE_COLOR = (50, 205, 50)                     # цвет змейки (светло-зелёный)
 APPLE_COLOR = (255, 69, 0)                      # цвет яблока (оранжево-красный)
 
@@ -254,6 +254,7 @@ def update_game_screen(screen_of_game, game_state):
     elif game_state["game_over"]:
         draw_game_over_screen(screen_of_game)
     else:
+        draw_game_field(screen_of_game)
         draw_snake(screen_of_game, game_state["snake"], game_state["direction"])
         draw_apples(screen_of_game, game_state["apples"])
         draw_score(screen_of_game, game_state["score"])
@@ -261,6 +262,16 @@ def update_game_screen(screen_of_game, game_state):
             draw_paused_screen(screen_of_game)
         draw_walls(screen_of_game)
     pygame.display.update()
+
+######ТЕСТ Отрисовать Игровое поле
+def draw_game_field(screen_of_game):
+    for column in range(SIZE_X):
+        for row in range(SIZE_Y):
+            rect = pygame.Rect(WALL_BLOCKS * BLOCK_SIZE + column * BLOCK_SIZE, WALL_BLOCKS * BLOCK_SIZE + row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+            if (column + row) % 2 == 0:
+                pygame.draw.rect(screen_of_game, GAME_FIELD_COLOR, rect)
+            else:
+                pygame.draw.rect(screen_of_game, GAME_FIELD_ADD_COLOR, rect)    
 
 ### 2.3.1 Отрисовать Новая игра
 def draw_new_game_screen(screen_of_game):
