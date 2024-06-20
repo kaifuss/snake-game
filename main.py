@@ -519,13 +519,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-'''    #создание полей для игры ( x_0, y_0, ширина, высота )
-    for column in range(amountOfRects):
-        for row in range(amountOfRects):
-            if (column + row) % 2 == 0:
-                pygame.draw.rect(screenOfGame, rectgColor, [130 + column * rectSize + column, 20 + row * rectSize + row, rectSize, rectSize])
-            else:
-                pygame.draw.rect(screenOfGame, secondRectgColor, [130 + column * rectSize + column, 20 + row * rectSize + row, rectSize, rectSize])
-'''
