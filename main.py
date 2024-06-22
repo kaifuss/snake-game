@@ -422,7 +422,7 @@ def draw_snake_tail(screen_of_game, pretail, tail):
 ### 2.3.3.3.1 Отрисовать Хвост ЛЕВУЮ часть сегмента тела
 def draw_snake_tail_left(screen_of_game, x_0, y_0):
     draw_snake_body_right(screen_of_game, x_0, y_0)
-    
+
     tail_points = []
     tail_points.append((x_0 * BLOCK_SIZE + BORDERS_SIZE, y_0 * BLOCK_SIZE + BORDERS_SIZE + HALF_BLOCK_SIZE))
     tail_points.append((x_0 * BLOCK_SIZE + BORDERS_SIZE + HALF_BLOCK_SIZE, y_0 * BLOCK_SIZE + BORDERS_SIZE + QUARTER_BLOCK_SIZE))
