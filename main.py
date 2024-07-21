@@ -10,14 +10,14 @@ WINDOW_ICON = 'icon.png'                                            #иконк�
 WINDOW_CAPTION = 'Snake-Game'                                       #название окна
 
 #КОНСТАНТЫ ИГРОВОГО ПОЛЯ
-BLOCK_SIZE = 20                                     #размер квадратика
-WALL_BLOCKS = 3                                     #количество блоков в стене 
-AMOUNT_OF_RECTS = 20                                #количество квадратиков
+BLOCK_SIZE = 20                                                 #размер квадратика
+WALL_BLOCKS = 3                                                 #количество блоков в стене 
+AMOUNT_OF_RECTS = 20                                            #количество квадратиков
 SIZE_X = (WIDTH_OF_WINDOW // BLOCK_SIZE  - WALL_BLOCKS * 2)     #количество блоков поля по X
 SIZE_Y = (HEIGHT_OF_WINDOW // BLOCK_SIZE - WALL_BLOCKS * 2)     #количество блоков поля по Y
-AMOUNT_OF_BLOCKS = SIZE_X * SIZE_Y                  #количество блоков
+AMOUNT_OF_BLOCKS = SIZE_X * SIZE_Y                              #количество блоков
 
-#КОНСТАНТЫ ОТРИСОВКИ ИГРЫ
+#КОНСТАНТЫ ОТРИСОВКИ БЛОКОВ ИГРЫ
 START_SNAKE_X = SIZE_X // 2                         #X_0 координата головы змейки
 START_SNAKE_Y = SIZE_Y // 2                         #Y_0 координата головы змейки
 APPLE_RADIUS = BLOCK_SIZE // 2                      #радиус яблока
@@ -25,7 +25,8 @@ HALF_BLOCK_SIZE = BLOCK_SIZE // 2                   #половина разме
 THREE_QUARTERS_BLOCK_SIZE = BLOCK_SIZE * 3 / 4      #три четверти размера квадратика
 QUARTER_BLOCK_SIZE = BLOCK_SIZE // 4                #четверть размера квадратика
 BORDERS_SIZE = BLOCK_SIZE * WALL_BLOCKS             #размер границ
-
+SNAKE_X_SEGMENT = (HALF_BLOCK_SIZE, QUARTER_BLOCK_SIZE)     #размер сегмента змейки по OX
+SNAKE_Y_SEGMENT = (QUARTER_BLOCK_SIZE, HALF_BLOCK_SIZE)     #размер сегмента змейки по OY
 
 #КОНСТАНТЫ ИГРОВОГО ПРОЦЕССА
 INITIAL_APPLES_COUNT = 3                            #постоянное количество яблок
@@ -49,9 +50,6 @@ CAPTION_FONT = pygame.font.SysFont('roboto', CAPTION_FONT_SIZE)  # шрифт з
 TEXT_FONT_SIZE = BLOCK_SIZE * 2  # размер шрифта текста
 TEXT_FONT = pygame.font.SysFont('roboto', TEXT_FONT_SIZE)  # шрифт текста
 
-# КОНСТАНТЫ БЛОКИ
-SNAKE_X_SEGMENT = (HALF_BLOCK_SIZE, QUARTER_BLOCK_SIZE)     #размер сегмента змейки по OX
-SNAKE_Y_SEGMENT = (QUARTER_BLOCK_SIZE, HALF_BLOCK_SIZE)     #размер сегмента змейки по OY
 
 ############## 1. ФУНКЦИИ БЛОКА MAIN
 
