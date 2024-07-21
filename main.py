@@ -267,10 +267,10 @@ def update_game_screen(screen_of_game, game_state):
         draw_game_field(screen_of_game)
         draw_snake(screen_of_game, game_state["snake"], game_state["direction"])
         draw_apples(screen_of_game, game_state["apples"])
-        draw_score(screen_of_game, game_state["score"])
         if game_state["game_paused"]:
             draw_paused_screen(screen_of_game)
         draw_walls(screen_of_game)
+        draw_score(screen_of_game, game_state["score"], game_state["game_speed"])
     pygame.display.update()
 
 ######ТЕСТ Отрисовать Игровое поле
@@ -486,13 +486,27 @@ def draw_walls(screen_of_game):
     #правая стена
     pygame.draw.rect(screen_of_game, WALLS_COLOR, ((WIDTH_OF_WINDOW - BORDERS_SIZE, BORDERS_SIZE), (WIDTH_OF_WINDOW, HEIGHT_OF_WINDOW - BORDERS_SIZE)), border_radius=0)
 
-### 2.3.6 Отрисовать счет
-def draw_score(screen_of_game, score):
-    pass
+### 2.3.6 Отрисовать счет и скорость
+def draw_score(screen_of_game, score, speed):
+    #счет
+    score_text = TEXT_FONT.render(f"Score: {score}", True, TEXT_FONT_COLOR)
+    score_text_rect = score_text.get_rect()
+    score_text_rect.topleft = (BORDERS_SIZE, BLOCK_SIZE)
+    screen_of_game.blit(score_text, score_text_rect)
+
+    #скорость
+    speed_text = TEXT_FONT.render(f"Speed: {speed}", True, TEXT_FONT_COLOR)
+    speed_text_rect = speed_text.get_rect()
+    speed_text_rect.topright = (WIDTH_OF_WINDOW - BORDERS_SIZE, BLOCK_SIZE)
+    screen_of_game.blit(speed_text, speed_text_rect)
 
 ### 2.3.7 Отрисовать Выигрыш
 def draw_game_won_screen(screen_of_game):
-    pass
+    screen_of_game.fill(WALLS_COLOR)
+    font = pygame.font.Font(None, 74)
+    text = font.render("Победа!", True, (220, 220, 220))
+    text_rect = text.get_rect(center=(SIZE_OF_WINDOW[0] // 2, SIZE_OF_WINDOW[1] // 3))
+    screen_of_game.blit(text, text_rect)
 
 ### 2.3.8 Отрисовать Поражение
 def draw_game_over_screen(screen_of_game):
